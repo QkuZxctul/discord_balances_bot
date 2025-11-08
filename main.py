@@ -68,7 +68,7 @@ async def check_balance(inter: disnake.ApplicationCommandInteraction):
 
     embed = disnake.Embed(
         title=f"Баланс {inter.author.display_name}",
-        description=f"💰 Ваш баланс: **{balance}** серебра",
+        description=f"💰 Ваш баланс: **{balance: ,}** серебра",
         color=0x00ff00
     )
     await inter.response.send_message(embed=embed)
@@ -78,11 +78,10 @@ async def check_balance(inter: disnake.ApplicationCommandInteraction):
 async def add_balance(
         inter: disnake.ApplicationCommandInteraction,
         user: disnake.User,
-        quantity: str
+        quantity: int
 ):
     if inter.channel.id not in CHANNELS_ID:
         return
-    quantity = int(quantity.replace(' ', ''))
     # Проверяем, имеет ли пользователь права на выполнение команды
     if inter.author.id != ADMIN_USER_ID:
         embed = disnake.Embed(
@@ -93,7 +92,7 @@ async def add_balance(
         await inter.response.send_message(embed=embed, ephemeral=True)
         return
 
-    if quantity <= 0:
+    if int(quantity) <= 0:
         embed = disnake.Embed(
             title="Ошибка",
             description="❌ Количество должно быть положительным числом!",
@@ -108,10 +107,10 @@ async def add_balance(
 
     embed = disnake.Embed(
         title="Баланс обновлен",
-        description=f"✅ {inter.author.mention} добавил {quantity} монет пользователю {user.mention}",
+        description=f"✅ {inter.author.mention} добавил {quantity: ,} монет пользователю {user.mention}",
         color=0x00ff00
     )
-    embed.add_field(name="Новый баланс", value=f"💰 {current_balance + quantity} серебра")
+    embed.add_field(name="Новый баланс", value=f"💰 {current_balance + quantity: ,} серебра")
     await inter.response.send_message(embed=embed)
 
 
@@ -120,11 +119,10 @@ async def add_balance(
 async def minus_balance(
         inter: disnake.ApplicationCommandInteraction,
         user: disnake.User,
-        quantity: str
+        quantity: int
 ):
     if inter.channel.id not in CHANNELS_ID:
         return
-    quantity = int(quantity.replace(' ', ''))
     # Проверяем, имеет ли пользователь права на выполнение команды
     if inter.author.id != ADMIN_USER_ID:
         embed = disnake.Embed(
@@ -150,7 +148,7 @@ async def minus_balance(
     if current_balance < quantity:
         embed = disnake.Embed(
             title="Ошибка",
-            description=f"❌ Недостаточно средств! У пользователя только {current_balance} монет",
+            description=f"❌ Недостаточно средств! У пользователя только {current_balance: ,} монет",
             color=0xff0000
         )
         await inter.response.send_message(embed=embed, ephemeral=True)
@@ -167,10 +165,10 @@ async def minus_balance(
 
     embed = disnake.Embed(
         title="Баланс обновлен",
-        description=f"🔻 {inter.author.mention} уменьшил баланс пользователя {user.mention} на {quantity} монет",
+        description=f"🔻 {inter.author.mention} уменьшил баланс пользователя {user.mention} на {quantity: ,} монет",
         color=0xffa500
     )
-    embed.add_field(name="Новый баланс", value=f"💰 {current_balance - quantity} монет")
+    embed.add_field(name="Новый баланс", value=f"💰 {current_balance - quantity: ,} монет")
     await inter.response.send_message(embed=embed)
 
 
@@ -205,7 +203,7 @@ async def all_balances(inter: disnake.ApplicationCommandInteraction):
         except:
             username = f"Пользователь {user.user_id}"
 
-        balance_text += f"**{i}. {username}** - {user.balance} серебра\n"
+        balance_text += f"**{i}. {username}** - {user.balance: ,} серебра\n"
 
         # Если текст становится слишком длинным, отправляем текущее сообщение и создаем новое
         if len(balance_text) > 900:
@@ -232,7 +230,7 @@ async def all_balances(inter: disnake.ApplicationCommandInteraction):
         total_balance = sum(user.balance for user in users_with_balances)
         embed.add_field(
             name="Общий баланс",
-            value=f"💰 Всего в системе: **{total_balance}** серебра",
+            value=f"💰 Всего в системе: **{total_balance: ,}** серебра",
             inline=False
         )
 
