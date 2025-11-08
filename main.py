@@ -8,6 +8,8 @@ load_dotenv('.env')
 
 BOT_TOKEN = getenv('BOT_TOKEN')
 ADMIN_USER_ID = int(getenv('ADMIN_USER_ID'))
+CHANNELS = getenv('CHANNELS_ID')
+CHANNELS_ID = [int(x) for x in CHANNELS.split(',')] if ',' in CHANNELS else [int(CHANNELS)]
 
 database = peewee.SqliteDatabase("data/database.db")
 
@@ -59,6 +61,8 @@ def get_all_balances() -> list:
 # Команда для просмотра баланса
 @bot.slash_command(description="Посмотреть баланс")
 async def check_balance(inter: disnake.ApplicationCommandInteraction):
+    if inter.channel.id not in CHANNELS_ID:
+        return
     user_id = int(inter.author.id)
     balance = get_balance_db(user_id)
 
@@ -74,10 +78,12 @@ async def check_balance(inter: disnake.ApplicationCommandInteraction):
 async def add_balance(
         inter: disnake.ApplicationCommandInteraction,
         user: disnake.User,
-        quantity: int
+        quantity: str
 ):
+    if inter.channel.id not in CHANNELS_ID:
+        return
+    quantity = int(quantity.replace(' ', ''))
     # Проверяем, имеет ли пользователь права на выполнение команды
-    print(inter.author.id, ADMIN_USER_ID)
     if inter.author.id != ADMIN_USER_ID:
         embed = disnake.Embed(
             title="Ошибка",
@@ -114,8 +120,11 @@ async def add_balance(
 async def minus_balance(
         inter: disnake.ApplicationCommandInteraction,
         user: disnake.User,
-        quantity: int
+        quantity: str
 ):
+    if inter.channel.id not in CHANNELS_ID:
+        return
+    quantity = int(quantity.replace(' ', ''))
     # Проверяем, имеет ли пользователь права на выполнение команды
     if inter.author.id != ADMIN_USER_ID:
         embed = disnake.Embed(
@@ -168,6 +177,8 @@ async def minus_balance(
 # Команда для просмотра всех балансов
 @bot.slash_command(description="Показать балансы всех пользователей")
 async def all_balances(inter: disnake.ApplicationCommandInteraction):
+    if inter.channel.id not in CHANNELS_ID:
+        return
     users_with_balances = get_all_balances()
 
     if not users_with_balances:
@@ -226,6 +237,7 @@ async def all_balances(inter: disnake.ApplicationCommandInteraction):
         )
 
     await inter.response.send_message(embed=embed)
+
 
 # Запуск бота
 if __name__ == "__main__":
