@@ -1,0 +1,11 @@
+services:
+  discord-bot:
+    build: .
+    container_name: discord-balance-bot
+    working_dir: /app
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+
+volumes:
+  sqllite_data:
